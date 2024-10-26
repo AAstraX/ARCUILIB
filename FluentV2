@@ -117,7 +117,7 @@ function FluentLibrary:CreateWindow(title)
                 BackgroundColor3 = Color3.fromRGB(255, 0, 0)
             })
 
-            ToggleButton.MouseButton 1Click:Connect(function()
+            ToggleButton.MouseButton1Click:Connect(function()
                 Toggle.Enabled = not Toggle.Enabled
                 ToggleButton.BackgroundColor3 = Toggle.Enabled and 
                     Color3.fromRGB(0, 255, 0) or 
@@ -222,7 +222,7 @@ function FluentLibrary:CreateWindow(title)
 
                 local HueSlider = CreateInstance("Frame", {
                     Size = UDim2.new(0, 180, 0, 20),
-                    Position = UDim2.new(0, 10, 0, 10),
+                    Position = UDim2.new (0, 10, 0, 10),
                     BackgroundColor3 = Color3.fromRGB(60, 60, 60)
                 })
 
