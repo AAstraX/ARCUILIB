@@ -1,6 +1,6 @@
 local FluentLibrary = {}
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("User InputService")
+local UserInputService = game:GetService("UserInputService")
 
 -- Utility Functions
 local function CreateInstance(className, properties)
