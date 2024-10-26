@@ -37,11 +37,17 @@ function FluentLibrary:CreateWindow(title)
             isDragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
+        elseif input.UserInputType == Enum.UserInputType.Touch then
+           isDragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
         end
     end)
     
     MainFrame.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+         elseif input.UserInputType == Enum.UserInputType.Touch then
             isDragging = false
         end
     end)
@@ -49,6 +55,8 @@ function FluentLibrary:CreateWindow(title)
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             dragInput = input
+        elseif input.UserInputType == Enum.UserInputType.Touch then
+           dragInput = input
         end
     end)
     
