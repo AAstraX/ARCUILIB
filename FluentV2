@@ -96,6 +96,8 @@ function FluentLibrary:CreateWindow(title)
 
             Button.MouseButton1Click:Connect(callback)
             Button.Parent = MainFrame -- Parent to the main frame
+            Button.Position = UDim2.new(0.5, -90, 0.1 + (#self.Buttons * 0.1), 0) -- Adjust position based on number of buttons
+            table.insert(self.Buttons, Button) -- Store button reference
             return Button
         end
 
@@ -115,7 +117,7 @@ function FluentLibrary:CreateWindow(title)
                 BackgroundColor3 = Color3.fromRGB(255, 0, 0)
             })
 
-            ToggleButton.MouseButton1Click:Connect(function()
+            ToggleButton.MouseButton 1Click:Connect(function()
                 Toggle.Enabled = not Toggle.Enabled
                 ToggleButton.BackgroundColor3 = Toggle.Enabled and 
                     Color3.fromRGB(0, 255, 0) or 
@@ -124,7 +126,9 @@ function FluentLibrary:CreateWindow(title)
             end)
 
             ToggleFrame.Parent = MainFrame -- Parent to the main frame
+            ToggleFrame.Position = UDim2.new(0.5, -90, 0.1 + (#self.Toggles * 0.1), 0) -- Adjust position based on number of toggles
             ToggleButton.Parent = ToggleFrame
+            table.insert(self.Toggles, Toggle) -- Store toggle reference
             return Toggle
         end
 
@@ -177,8 +181,10 @@ function FluentLibrary:CreateWindow(title)
             end)
 
             SliderFrame.Parent = MainFrame -- Parent to the main frame
+            SliderFrame.Position = UDim2.new(0.5, -90, 0.1 + (#self.Sliders * 0.1), 0) -- Adjust position based on number of sliders
             SliderBar.Parent = SliderFrame
             SliderFill.Parent = SliderBar
+            table.insert(self.Sliders, Slider) -- Store slider reference
             return Slider
         end
 
@@ -257,8 +263,10 @@ function FluentLibrary:CreateWindow(title)
             end)
 
             ColorPickerFrame.Parent = MainFrame -- Parent to the main frame
+            ColorPickerFrame.Position = UDim2.new(0.5, -90, 0.1 + (#self.ColorPickers * 0.1), 0) -- Adjust position based on number of color pickers
             ColorPreview.Parent = ColorPickerFrame
             ColorButton.Parent = ColorPickerFrame
+            table.insert(self.ColorPickers, ColorPicker) -- Store color picker reference
             return ColorPicker
         end
 
