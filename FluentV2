@@ -77,14 +77,6 @@ function FluentLibrary:CreateWindow(title)
             ColorPickers = {}
         }
 
-        -- Tab Button Creation
-        local TabButton = CreateInstance("TextButton", {
-            Text = tabName,
-            Size = UDim2.new(0, 100, 0, 30),
-            BackgroundColor3 = Color3.fromRGB(35, 35, 35),
-            TextColor3 = Color3.fromRGB(255, 255, 255)
-        })
-
         -- Create Elements
         function Tab:CreateButton(buttonText, callback)
             local Button = CreateInstance("TextButton", {
@@ -122,7 +114,7 @@ function FluentLibrary:CreateWindow(title)
                 ToggleButton.BackgroundColor3 = Toggle.Enabled and 
                     Color3.fromRGB(0, 255, 0) or 
                     Color3.fromRGB(255, 0, 0)
-                callback(Toggle.Enabled)
+                callback(Toggle.Enabled )
             end)
 
             ToggleFrame.Parent = MainFrame -- Parent to the main frame
@@ -227,7 +219,7 @@ function FluentLibrary:CreateWindow(title)
                 })
 
                 local SaturationSlider = CreateInstance("Frame", {
-                    Size = UDim2.new(0, 180, 0, 20),
+                    Size = UDim 2.new(0, 180, 0, 20),
                     Position = UDim2.new(0, 10, 0, 40),
                     BackgroundColor3 = Color3.fromRGB(60, 60, 60)
                 })
