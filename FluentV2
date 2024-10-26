@@ -1,6 +1,6 @@
 local FluentLibrary = {}
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+local UserInputService = game:GetService("User InputService")
 
 -- Utility Functions
 local function CreateInstance(className, properties)
@@ -18,20 +18,28 @@ function FluentLibrary:CreateWindow(title)
     }
 
     -- Create a ScreenGui to hold the UI
-    local ScreenGui = CreateInstance("ScreenGui", {
-        Name = "FluentScreenGui",
-        ResetOnSpawn = false
-    })
+    local ScreenGui =
+        CreateInstance(
+        "ScreenGui",
+        {
+            Name = "FluentScreenGui",
+            ResetOnSpawn = false
+        }
+    )
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") -- Parent to PlayerGui
 
     -- Main Window Frame
-    local MainFrame = CreateInstance("Frame", {
-        Name = "FluentWindow",
-        Size = UDim2.new(0, 500, 0, 350),
-        Position = UDim2.new(0.5, -250, 0.5, -175),
-        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-        BorderSizePixel = 0
-    })
+    local MainFrame =
+        CreateInstance(
+        "Frame",
+        {
+            Name = "FluentWindow",
+            Size = UDim2.new(0, 500, 0, 350),
+            Position = UDim2.new(0.5, -250, 0.5, -175),
+            BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+            BorderSizePixel = 0
+        }
+    )
     MainFrame.Parent = ScreenGui -- Parent the MainFrame to the ScreenGui
 
     -- Make window draggable
@@ -40,33 +48,39 @@ function FluentLibrary:CreateWindow(title)
     local dragStart
     local startPos
 
-    MainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-        elseif input.UserInputType == Enum.UserInputType.Touch then
-            isDragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
+    MainFrame.InputBegan:Connect(
+        function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = true
+                dragStart = input.Position
+                startPos = MainFrame.Position
+            elseif input.UserInputType == Enum.UserInputType.Touch then
+                isDragging = true
+                dragStart = input.Position
+                startPos = MainFrame.Position
+            end
         end
-    end)
+    )
 
-    MainFrame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        elseif input.UserInputType == Enum.UserInputType.Touch then
-            isDragging = false
+    MainFrame.InputEnded:Connect(
+        function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = false
+            elseif input.UserInputType == Enum.UserInputType.Touch then
+                isDragging = false
+            end
         end
-    end)
+    )
 
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        elseif input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
+    UserInputService.InputChanged:Connect(
+        function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            elseif input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
         end
-    end)
+    )
 
     -- Create Tab System
     function GUI:CreateTab(tabName)
@@ -79,12 +93,16 @@ function FluentLibrary:CreateWindow(title)
 
         -- Create Elements
         function Tab:CreateButton(buttonText, callback)
-            local Button = CreateInstance("TextButton", {
-                Text = buttonText,
-                Size = UDim2.new(0, 180, 0, 30),
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-                TextColor3 = Color3.fromRGB(255, 255, 255)
-            })
+            local Button =
+                CreateInstance(
+                "TextButton",
+                {
+                    Text = buttonText,
+                    Size = UDim2.new(0, 180, 0, 30),
+                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                    TextColor3 = Color3.fromRGB(255, 255, 255)
+                }
+            )
 
             Button.MouseButton1Click:Connect(callback)
             Button.Parent = MainFrame -- Parent to the main frame
@@ -98,24 +116,33 @@ function FluentLibrary:CreateWindow(title)
                 Enabled = false
             }
 
-            local ToggleFrame = CreateInstance("Frame", {
-                Size = UDim2.new(0, 180, 0, 30),
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            })
+            local ToggleFrame =
+                CreateInstance(
+                "Frame",
+                {
+                    Size = UDim2.new(0, 180, 0, 30),
+                    BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                }
+            )
 
-            local ToggleButton = CreateInstance("TextButton", {
-                Size = UDim2.new(0, 20, 0, 20),
-                Position = UDim2.new(0, 5, 0.5, -10),
-                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            })
+            local ToggleButton =
+                CreateInstance(
+                "TextButton",
+                {
+                    Size = UDim2.new(0, 20, 0, 20),
+                    Position = UDim2.new(0, 5, 0.5, -10),
+                    BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                }
+            )
 
-            ToggleButton.MouseButton1Click:Connect(function()
-                Toggle.Enabled = not Toggle.Enabled
-                ToggleButton.BackgroundColor3 = Toggle.Enabled and 
-                    Color3.fromRGB(0, 255, 0) or 
-                    Color3.fromRGB(255, 0, 0)
-                callback(Toggle.Enabled )
-            end)
+            ToggleButton.MouseButton1Click:Connect(
+                function()
+                    Toggle.Enabled = not Toggle.Enabled
+                    ToggleButton.BackgroundColor3 =
+                        Toggle.Enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+                    callback(Toggle.Enabled)
+                end
+            )
 
             ToggleFrame.Parent = MainFrame -- Parent to the main frame
             ToggleFrame.Position = UDim2.new(0.5, -90, 0.1 + (#self.Toggles * 0.1), 0) -- Adjust position based on number of toggles
@@ -129,48 +156,66 @@ function FluentLibrary:CreateWindow(title)
                 Value = default or min
             }
 
-            local SliderFrame = CreateInstance("Frame", {
-                Size = UDim2.new(0, 180, 0, 45),
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            })
+            local SliderFrame =
+                CreateInstance(
+                "Frame",
+                {
+                    Size = UDim2.new(0, 180, 0, 45),
+                    BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                }
+            )
 
-            local SliderBar = CreateInstance("Frame", {
-                Size = UDim2.new(0, 160, 0, 5),
-                Position = UDim2.new(0, 10, 0.7, 0),
-                BackgroundColor3 = Color3.fromRGB(60, 60 , 60)
-            })
+            local SliderBar =
+                CreateInstance(
+                "Frame",
+                {
+                    Size = UDim2.new(0, 160, 0, 5),
+                    Position = UDim2.new(0, 10, 0.7, 0),
+                    BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                }
+            )
 
-            local SliderFill = CreateInstance("Frame", {
-                Size = UDim2.new((default - min)/(max - min), 0, 1, 0),
-                BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-            })
+            local SliderFill =
+                CreateInstance(
+                "Frame",
+                {
+                    Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
+                    BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+                }
+            )
 
             -- Slider Functionality
             local isDragging = false
 
-            SliderBar.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    isDragging = true
+            SliderBar.InputBegan:Connect(
+                function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        isDragging = true
+                    end
                 end
-            end)
+            )
 
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    isDragging = false
+            UserInputService.InputEnded:Connect(
+                function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        isDragging = false
+                    end
                 end
-            end)
+            )
 
-            SliderBar.InputChanged:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging then
-                    local mousePos = UserInputService:GetMouseLocation()
-                    local relativePos = mousePos.X - SliderBar.AbsolutePosition.X
-                    local percentage = math.clamp(relativePos / SliderBar.AbsoluteSize.X, 0, 1)
+            SliderBar.InputChanged:Connect(
+                function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging then
+                        local mousePos = UserInputService:GetMouseLocation()
+                        local relativePos = mousePos.X - SliderBar.AbsolutePosition.X
+                        local percentage = math.clamp(relativePos / SliderBar.AbsoluteSize.X, 0, 1)
 
-                    Slider.Value = min + ((max - min) * percentage)
-                    SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-                    callback(Slider.Value)
+                        Slider.Value = min + ((max - min) * percentage)
+                        SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
+                        callback(Slider.Value)
+                    end
                 end
-            end)
+            )
 
             SliderFrame.Parent = MainFrame -- Parent to the main frame
             SliderFrame.Position = UDim2.new(0.5, -90, 0.1 + (#self.Sliders * 0.1), 0) -- Adjust position based on number of sliders
@@ -185,74 +230,114 @@ function FluentLibrary:CreateWindow(title)
                 Color = defaultColor or Color3.new(1, 1, 1)
             }
 
-            local ColorPickerFrame = CreateInstance("Frame", {
-                Size = UDim2.new(0, 180, 0, 45),
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            })
+            local ColorPickerFrame =
+                CreateInstance(
+                "Frame",
+                {
+                    Size = UDim2.new(0, 180, 0, 45),
+                    BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                }
+            )
 
-            local ColorPreview = CreateInstance("Frame", {
-                Size = UDim2.new(0, 30, 0, 30),
-                Position = UDim2.new(0, 5, 0.5, -15),
-                BackgroundColor3 = ColorPicker.Color
-            })
-
-            local ColorButton = CreateInstance("TextButton", {
-                Text = colorPickerText,
-                Size = UDim2.new(0, 140, 0, 30),
-                Position = UDim2.new(0, 40, 0, 0),
-                BackgroundColor3 = Color3.fromRGB(60, 60, 60),
-                TextColor3 = Color3.fromRGB(255, 255, 255)
-            })
-
-            ColorButton.MouseButton1Click:Connect(function()
-                -- Open color picker dialog
-                local ColorDialog = CreateInstance("Frame", {
-                    Size = UDim2.new(0, 200, 0, 200),
-                    BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-                    BorderSizePixel = 0
-                })
-
-                local HueSlider = CreateInstance("Frame", {
-                    Size = UDim2.new(0, 180, 0, 20),
-                    Position = UDim2.new (0, 10, 0, 10),
-                    BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                })
-
-                local SaturationSlider = CreateInstance("Frame", {
-                    Size = UDim 2.new(0, 180, 0, 20),
-                    Position = UDim2.new(0, 10, 0, 40),
-                    BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                })
-
-                local ValueSlider = CreateInstance("Frame", {
-                    Size = UDim2.new(0, 180, 0, 20),
-                    Position = UDim2.new(0, 10 , 0, 70),
-                    BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                })
-
-                local ColorPreviewDialog = CreateInstance("Frame", {
+            local ColorPreview =
+                CreateInstance(
+                "Frame",
+                {
                     Size = UDim2.new(0, 30, 0, 30),
-                    Position = UDim2.new(0, 10, 0, 100),
+                    Position = UDim2.new(0, 5, 0.5, -15),
                     BackgroundColor3 = ColorPicker.Color
-                })
+                }
+            )
 
-                local ConfirmButton = CreateInstance("TextButton", {
-                    Text = "Confirm",
-                    Size = UDim2.new(0, 80, 0, 30),
-                    Position = UDim2.new(0,  60, 0, 140),
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+            local ColorButton =
+                CreateInstance(
+                "TextButton",
+                {
+                    Text = colorPickerText,
+                    Size = UDim2.new(0, 140, 0, 30),
+                    Position = UDim2.new(0, 40, 0, 0),
+                    BackgroundColor3 = Color3.fromRGB(60, 60, 60),
                     TextColor3 = Color3.fromRGB(255, 255, 255)
-                })
+                }
+            )
 
-                ConfirmButton.MouseButton1Click:Connect(function()
-                    ColorDialog:Destroy()
-                    ColorPicker.Color = Color3.new(HueSlider.Value, SaturationSlider.Value, ValueSlider.Value)
-                    ColorPreview.BackgroundColor3 = ColorPicker.Color
-                    callback(ColorPicker.Color)
-                end)
+            ColorButton.MouseButton1Click:Connect(
+                function()
+                    -- Open color picker dialog
+                    local ColorDialog =
+                        CreateInstance(
+                        "Frame",
+                        {
+                            Size = UDim2.new(0, 200, 0, 200),
+                            BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+                            BorderSizePixel = 0
+                        }
+                    )
 
-                ColorDialog.Parent = MainFrame
-            end)
+                    local HueSlider =
+                        CreateInstance(
+                        "Frame",
+                        {
+                            Size = UDim2.new(0, 180, 0, 20),
+                            Position = UDim2.new(0, 10, 0, 10),
+                            BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                        }
+                    )
+
+                    local SaturationSlider =
+                        CreateInstance(
+                        "Frame",
+                        {
+                            Size = UDim2.new(0, 180, 0, 20),
+                            Position = UDim2.new(0, 10, 0, 40),
+                            BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                        }
+                    )
+
+                    local ValueSlider =
+                        CreateInstance(
+                        "Frame",
+                        {
+                            Size = UDim2.new(0, 180, 0, 20),
+                            Position = UDim2.new(0, 10, 0, 70),
+                            BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                        }
+                    )
+
+                    local ColorPreviewDialog =
+                        CreateInstance(
+                        "Frame",
+                        {
+                            Size = UDim2.new(0, 30, 0, 30),
+                            Position = UDim2.new(0, 10, 0, 100),
+                            BackgroundColor3 = ColorPicker.Color
+                        }
+                    )
+
+                    local ConfirmButton =
+                        CreateInstance(
+                        "TextButton",
+                        {
+                            Text = "Confirm",
+                            Size = UDim2.new(0, 80, 0, 30),
+                            Position = UDim2.new(0, 60, 0, 140),
+                            BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                            TextColor3 = Color3.fromRGB(255, 255, 255)
+                        }
+                    )
+
+                    ConfirmButton.MouseButton1Click:Connect(
+                        function()
+                            ColorDialog:Destroy()
+                            ColorPicker.Color = Color3.new(HueSlider.Value, SaturationSlider.Value, ValueSlider.Value)
+                            ColorPreview.BackgroundColor3 = ColorPicker.Color
+                            callback(ColorPicker.Color)
+                        end
+                    )
+
+                    ColorDialog.Parent = MainFrame
+                end
+            )
 
             ColorPickerFrame.Parent = MainFrame -- Parent to the main frame
             ColorPickerFrame.Position = UDim2.new(0.5, -90, 0.1 + (#self.ColorPickers * 0.1), 0) -- Adjust position based on number of color pickers
