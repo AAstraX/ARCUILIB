@@ -1,207 +1,330 @@
--- FluentLibrary.lua
-local FluentLibrary = {}
-FluentLibrary.__index = FluentLibrary
+local FluentLib = {}
 
--- Function to create a new ScreenGui
-function FluentLibrary:CreateScreenGui(player)
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "FluentLibraryGui"
-    screenGui.Parent = player:WaitForChild("PlayerGui")
-    return screenGui
-end
+-- Services
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
--- Function to create a new window
-function FluentLibrary:CreateWindow(player, title)
-    local screenGui = self:CreateScreenGui(player)
-    local window = Instance.new("Frame")
-    window.Size = UDim2.new(0, 400, 0, 300)
-    window.Position = UDim2.new(0.5, -200, 0.5, -150)
-    window.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    window.BorderSizePixel = 0
-    window.Parent = screenGui
+-- Constants
+local TWEEN_INFO = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, 0, 0, 30)
-    titleLabel.Text = title
-    titleLabel.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.Font = Enum.Font.SourceSansBold
-    titleLabel.Parent = window
-
-    -- Make the window draggable
-    local dragging = false
+function FluentLib:CreateWindow(title)
+    -- Main GUI Components
+    local ScreenGui = Instance.new("ScreenGui")
+    local MainFrame = Instance.new("Frame")
+    local UICorner = Instance.new("UICorner")
+    local Title = Instance.new("TextLabel")
+    local TabContainer = Instance.new("Frame")
+    local TabButtons = Instance.new("Frame")
+    local ContentContainer = Instance.new("ScrollingFrame")
+    
+    -- Setup ScreenGui
+    ScreenGui.Name = "FluentLibrary"
+    ScreenGui.Parent = game.CoreGui
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    -- Setup MainFrame
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 300, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    MainFrame.Parent = ScreenGui
+    
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = MainFrame
+    
+    -- Setup Title
+    Title.Name = "Title"
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.BackgroundTransparency = 1
+    Title.Text = title
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 16
+    Title.Font = Enum.Font.GothamBold
+    Title.Parent = MainFrame
+    
+    -- Setup Tab Container
+    TabContainer.Name = "TabContainer"
+    TabContainer.Size = UDim2.new(1, 0, 0, 30)
+    TabContainer.Position = UDim2.new(0, 0, 0, 30)
+    TabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    TabContainer.Parent = MainFrame
+    
+    UICorner:Clone().Parent = TabContainer
+    
+    -- Setup Tab Buttons
+    TabButtons.Name = "TabButtons"
+    TabButtons.Size = UDim2.new(1, 0, 1, 0)
+    TabButtons.BackgroundTransparency = 1
+    TabButtons.Parent = TabContainer
+    
+    -- Setup Content Container
+    ContentContainer.Name = "ContentContainer"
+    ContentContainer.Position = UDim2.new(0, 0, 0, 60)
+    ContentContainer.Size = UDim2.new(1, 0, 1, -60)
+    ContentContainer.BackgroundTransparency = 1
+    ContentContainer.ScrollBarThickness = 3
+    ContentContainer.Parent = MainFrame
+    
+    -- Make window draggable
+    local dragging
     local dragInput
     local dragStart
     local startPos
 
-    local function updatePosition(input)
-        local delta = input.Position - dragStart
-        window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    titleLabel.InputBegan:Connect(function(input)
+    Title.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
-            startPos = window.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
+            startPos = MainFrame.Position
         end
     end)
 
-    titleLabel.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
             dragInput = input
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input == dragInput and dragging then
+            dragging = false
         end
     end)
 
     game:GetService("RunService").RenderStepped:Connect(function()
         if dragging and dragInput then
-            updatePosition(dragInput)
+            local delta = dragInput.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
+
+    -- Library Functions
+    local window = {}
+    local yOffset = 5
+    local tabs = {}
+    local currentTab
+
+    function window:AddTab(tabName)
+        local TabButton = Instance.new("TextButton")
+        local TabUICorner = Instance.new("UICorner")
+        
+        TabButton.Name = tabName
+        TabButton.Size = UDim2.new(0, 100, 1, 0)
+        TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        TabButton.Text = tabName
+        TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TabButton.TextSize = 14
+        TabButton.Font = Enum.Font.Gotham
+        TabButton.Parent = TabButtons
+        
+        TabUICorner.CornerRadius = UDim.new(0, 4)
+        TabUICorner.Parent = TabButton
+        
+        local tabContent = Instance.new("Frame")
+        tabContent.Name = tabName .. "Content"
+        tabContent.Size = UDim2.new(1, 0, 1, 0)
+        tabContent.BackgroundTransparency = 1
+        tabContent.Parent = ContentContainer
+        
+        tabs[tabName] = tabContent
+        
+        TabButton.MouseButton1Click:Connect(function()
+            if currentTab then
+                currentTab.Visible = false
+            end
+            currentTab = tabContent
+            currentTab.Visible = true
+        end)
+        
+        if #tabs == 1 then
+            TabButton.MouseButton1Click:Invoke()
+        end
+    end
+
+    function window:AddButton(text, callback, tabName)
+        local tabContent = tabs[tabName]
+        if not tabContent then error("Tab '" .. tabName .. "' does not exist") end
+        
+        local Button = Instance.new("TextButton")
+        local ButtonUICorner = Instance.new("UICorner")
+        
+        Button.Name = "Button"
+        Button.Size = UDim2.new(0.9, 0, 0, 30)
+        Button.Position = UDim2.new(0.05, 0, 0, yOffset)
+        Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        Button.Text = text
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.TextSize = 14
+        Button.Font = Enum.Font.Gotham
+        Button.Parent = tabContent
+        
+        ButtonUICorner.CornerRadius = UDim.new(0, 4)
+        ButtonUICorner.Parent = Button
+        
+        Button.MouseButton1Click:Connect(function()
+            callback()
+            -- Animation
+            TweenService:Create(Button, TWEEN_INFO, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+            wait(0.3)
+            TweenService:Create(Button, TWEEN_INFO, {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+        end)
+        
+        yOffset = yOffset + 35
+        tabContent.CanvasSize = UDim2.new(0, 0, 0, yOffset + 5)
+        return Button
+    end
+
+    function window:AddToggle(text, default, callback, tabName)
+        local tabContent = tabs[tabName]
+        if not tabContent then error("Tab '" .. tabName .. "' does not exist") end
+        
+        local ToggleFrame = Instance.new("Frame")
+        local ToggleButton = Instance.new("TextButton")
+        local ToggleUICorner = Instance.new("UICorner")
+        local ToggleInner = Instance.new("Frame")
+        local ToggleInnerUICorner = Instance.new("UICorner")
+        local ToggleLabel = Instance.new("TextLabel")
+        
+        ToggleFrame.Name = "ToggleFrame"
+        ToggleFrame.Size = UDim2.new(0.9, 0, 0, 30)
+        ToggleFrame.Position = UDim2.new(0.05, 0, 0, yOffset)
+        ToggleFrame.BackgroundTransparency = 1
+        ToggleFrame.Parent = tabContent
+        
+        ToggleLabel.Name = "ToggleLabel"
+        ToggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+        ToggleLabel.BackgroundTransparency = 1
+        ToggleLabel.Text = text
+        ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ToggleLabel.TextSize = 14
+        ToggleLabel.Font = Enum.Font.Gotham
+        ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        ToggleLabel.Parent = ToggleFrame
+        
+        ToggleButton.Name = "ToggleButton"
+        ToggleButton.Position = UDim2.new(0.8, 0, 0.5, -10)
+        ToggleButton.Size = UDim2.new(0, 40, 0, 20)
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        ToggleButton.Text = ""
+        ToggleButton.Parent = ToggleFrame
+        
+        ToggleUICorner.CornerRadius = UDim.new(1, 0)
+        ToggleUICorner.Parent = ToggleButton
+        
+        ToggleInner.Name = "ToggleInner"
+        ToggleInner.Size = UDim2.new(0, 16, 0, 16)
+        ToggleInner.Position = UDim2.new(0, 2, 0.5, -8)
+        ToggleInner.BackgroundColor3 = Color3.fromRGB(255 , 255, 255)
+        ToggleInner.Parent = ToggleButton
+        
+        ToggleInnerUICorner.CornerRadius = UDim.new(1, 0)
+        ToggleInnerUICorner.Parent = ToggleInner
+        
+        local toggled = default or false
+        
+        local function updateToggle()
+            if toggled then TweenService:Create(ToggleInner, TWEEN_INFO, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+            else
+                TweenService:Create(ToggleInner, TWEEN_INFO, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            end
+        end
+        
+        ToggleButton.MouseButton1Click:Connect(function()
+            toggled = not toggled
+            updateToggle()
+            callback(toggled)
+        end)
+        
+        updateToggle()
+        
+        yOffset = yOffset + 35
+        tabContent.CanvasSize = UDim2.new(0, 0, 0, yOffset + 5)
+        return ToggleFrame
+    end
+
+    function window:AddSlider(text, min, max, default, callback, tabName)
+        local tabContent = tabs[tabName]
+        if not tabContent then error("Tab '" .. tabName .. "' does not exist") end
+        
+        local SliderFrame = Instance.new("Frame")
+        local SliderLabel = Instance.new("TextLabel")
+        local SliderBar = Instance.new("Frame")
+        local SliderFill = Instance.new("Frame")
+        local SliderHandle = Instance.new("Frame")
+        
+        SliderFrame.Name = "SliderFrame"
+        SliderFrame.Size = UDim2.new(0.9, 0, 0, 30)
+        SliderFrame.Position = UDim2.new(0.05, 0, 0, yOffset)
+        SliderFrame.BackgroundTransparency = 1
+        SliderFrame.Parent = tabContent
+        
+        SliderLabel.Name = "SliderLabel"
+        SliderLabel.Size = UDim2.new(0.7, 0, 1, 0)
+        SliderLabel.BackgroundTransparency = 1
+        SliderLabel.Text = text
+        SliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        SliderLabel.TextSize = 14
+        SliderLabel.Font = Enum.Font.Gotham
+        SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SliderLabel.Parent = SliderFrame
+        
+        SliderBar.Name = "SliderBar"
+        SliderBar.Position = UDim2.new(0.8, 0, 0.5, -10)
+        SliderBar.Size = UDim2.new(0, 200, 0, 10)
+        SliderBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        SliderBar.Parent = SliderFrame
+        
+        SliderFill.Name = "SliderFill"
+        SliderFill.Size = UDim2.new(0, (default - min) / (max - min) * 200, 0, 10)
+        SliderFill.Position = UDim2.new(0, 0, 0.5, -5)
+        SliderFill.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        SliderFill.Parent = SliderBar
+        
+        SliderHandle.Name = "SliderHandle"
+        SliderHandle.Size = UDim2.new(0, 16, 0, 16)
+        SliderHandle.Position = UDim2.new(0, (default - min) / (max - min) * 200 - 8, 0.5, -8)
+        SliderHandle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        SliderHandle.Parent = SliderBar
+        
+        local function updateSlider(value)
+            local fillSize = (value - min) / (max - min) * 200
+            TweenService:Create(SliderFill, TWEEN_INFO, {Size = UDim2.new(0, fillSize, 0, 10)}):Play()
+            TweenService:Create(SliderHandle, TWEEN_INFO, {Position = UDim2.new(0, fillSize - 8, 0.5, -8)}):Play()
+        end
+        
+        local function getValue()
+            local fillSize = SliderFill.Size.X.Offset
+            return (fillSize / 200) * (max - min) + min
+        end
+        
+        local function dragSlider(input)
+            local delta = input.Position.X - SliderHandle.Position.X.Offset
+            local value = getValue() + delta / 200 * (max - min)
+            value = math.clamp(value, min, max)
+            updateSlider(value)
+            callback(value)
+        end
+        
+        SliderHandle.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                UserInputService.InputChanged:Connect(dragSlider)
+            end
+        end)
+        
+        SliderHandle.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                UserInputService.InputChanged:Disconnect(dragSlider)
+            end
+        end)
+        
+        updateSlider(default)
+        
+        yOffset = yOffset + 35
+        tabContent.CanvasSize = UDim2.new(0, 0, 0, yOffset + 5)
+        return SliderFrame
+    end
 
     return window
 end
 
--- Create a new tab
-function FluentLibrary:CreateTab(window, tabName)
-    local tab = Instance.new("Frame")
-    tab.Size = UDim2.new(1, 0, 1, -30)
-    tab.Position = UDim2.new(0, 0, 0, 30)
-    tab.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-    tab.Parent = window
-
-    return tab
-end
-
--- Create a button
-function FluentLibrary:CreateButton(tab, text, callback)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 100, 0, 40)
-    button.Text = text
-    button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.SourceSans
-    button.Parent = tab
-
-    -- Add cartoonish animation
-    button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-        button:TweenSize(UDim2.new(1.1, 0, 1.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-    end)
-
-    button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        button:TweenSize(UDim2.new(1, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-    end)
-
-    button.MouseButton1Click:Connect(callback)
-
-    return button
-end
-
--- Create a toggle
-function FluentLibrary:CreateToggle(tab, text, callback)
-    local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 100, 0, 40)
-    toggle.Text = text .. ": OFF"
-    toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggle.Font = Enum.Font.SourceSans
-    toggle.Parent = tab
-
-    local toggleState = false
-
-    toggle.MouseButton1Click:Connect(function()
-        if toggleState then
-            toggle.Text = text .. ": OFF"
-            toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            toggleState = false
-        else
-            toggle.Text = text .. ": ON"
-            toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-            toggleState = true
-        end
-
-        callback(toggleState)
-    end)
-
-    return toggle
-end
-
--- Create a modal
-function FluentLibrary:CreateModal(window, title, message, callback)
-    local modal = Instance.new("Frame")
-    modal.Size = UDim2.new(0, 300, 0, 200)
-    modal.Position = UDim2.new(0.5, -150, 0.5, -100)
-    modal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    modal.BorderSizePixel = 0
-    modal.Parent = window
-
-    local modalTitle = Instance.new("TextLabel")
-    modalTitle.Size = UDim2.new(1, 0, 0, 30)
-    modalTitle.Text = title
-    modalTitle.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    modalTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    modalTitle.Font = Enum.Font.SourceSansBold
-    modalTitle.Parent = modal
-
-    local modalMessage = Instance.new("TextLabel")
-    modalMessage.Size = UDim2.new(1, 0, 1, -30)
-    modalMessage.Text = message
-    modalMessage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    modalMessage.TextColor3 = Color3.fromRGB(0, 0, 0)
-    modalMessage.Font = Enum.Font.SourceSans
-    modalMessage.Parent = modal
-
-    local modalButton = Instance.new("TextButton")
-    modalButton.Size = UDim2.new(0, 100, 0, 40)
-    modalButton.Text = "OK"
-    modalButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    modalButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    modalButton.Font = Enum.Font.SourceSans
-    modalButton.Parent = modal
-
-    modalButton.MouseButton1Click:Connect(function()
-        modal:Destroy()
-        callback()
-    end)
-
-    return modal
-end
-
--- Create a tooltip
-function FluentLibrary:CreateTooltip(tab, text)
-    local tooltip = Instance.new("TextLabel")
-    tooltip.Size = UDim2.new(0, 200, 0, 40)
-    tooltip.Text = text
-    tooltip.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    tooltip.TextColor3 = Color3.fromRGB(0, 0, 0)
-    tooltip.Font = Enum.Font.SourceSans
-    tooltip.Parent = tab
-
-    tooltip.BackgroundTransparency = 1
-    tooltip.TextTransparency = 1
-
-    local function showTooltip()
-        tooltip.BackgroundTransparency = 0
-        tooltip.TextTransparency = 0
-    end
-
-    local function hideTooltip()
-        tooltip.BackgroundTransparency = 1
-        tooltip.TextTransparency = 1
-    end
-
-    tab.MouseEnter:Connect(showTooltip)
-    tab.MouseLeave:Connect(hideTooltip)
-
-    return tooltip
-end
-
-return FluentLibrary
