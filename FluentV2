@@ -1,101 +1,198 @@
+-- FluentLibrary.lua
 local FluentLibrary = {}
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+FluentLibrary.__index = FluentLibrary
 
--- Utility Functions
-local function CreateInstance(className, properties)
-    local instance = Instance.new(className)
-    for property, value in pairs(properties) do
-        instance[property] = value
+-- Function to create a new window
+function FluentLibrary:CreateWindow(title)
+    local window = Instance.new("Frame")
+    window.Size = UDim2.new(0, 400, 0, 300)
+    window.Position = UDim2.new(0.5, -200, 0.5, -150)
+    window.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    window.BorderSizePixel = 0
+    window.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 30)
+    titleLabel.Text = title
+    titleLabel.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.Parent = window
+
+    -- Make the window draggable
+    local dragging = false
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function updatePosition(input)
+        local delta = input.Position - dragStart
+        window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
-    return instance
+
+    titleLabel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = window.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    titleLabel.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if dragging and dragInput then
+            updatePosition(dragInput)
+        end
+    end)
+
+    return window
 end
 
-function FluentLibrary:CreateWindow(title)
-    local GUI = {
-        Tabs = {},
-        CurrentTab = nil
-    }
+-- Create a new tab
+function FluentLibrary:CreateTab(window, tabName)
+    local tab = Instance.new("Frame")
+    tab.Size = UDim2.new(1, 0, 1, -30)
+    tab.Position = UDim2.new(0, 0, 0, 30)
+    tab.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    tab.Parent = window
 
-    local ScreenGui = CreateInstance("ScreenGui", {
-        Name = "FluentScreenGui",
-        ResetOnSpawn = false
-    })
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    return tab
+end
 
-    local MainFrame = CreateInstance("Frame", {
-        Name = "FluentWindow",
-        Size = UDim2.new(0, 500, 0, 350),
-        Position = UDim2.new(0.5, -250, 0.5, -175),
-        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-        BorderSizePixel = 0
-    })
-    MainFrame.Parent = ScreenGui
+-- Create a button
+function FluentLibrary:CreateButton(tab, text, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 100, 0, 40)
+    button.Text = text
+    button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.SourceSans
+    button.Parent = tab
 
-    -- Make window draggable (dragging code remains the same)
+    -- Add cartoonish animation
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+        button:TweenSize(UDim2.new(1.1, 0, 1.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+    end)
 
-    function GUI:CreateTab(tabName)
-        local Tab = {
-            Buttons = {},
-            Toggles = {},
-            Sliders = {},
-            ColorPickers = {}
-        }
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+        button:TweenSize(UDim2.new(1, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+    end)
 
-        function Tab:CreateButton(buttonText, callback)
-            local Button = CreateInstance("TextButton", {
-                Text = buttonText,
-                Size = UDim2.new(0, 180, 0, 30),
-                Position = UDim2.new(0.05, 0, 0.1 + (#self.Buttons * 0.12), 0), -- Left side positioning
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-                TextColor3 = Color3.fromRGB(255, 255, 255)
-            })
-            Button.MouseButton1Click:Connect(callback)
-            Button.Parent = MainFrame
-            table.insert(self.Buttons, Button)
-            return Button
+    button.MouseButton1Click:Connect(callback)
+
+    return button
+end
+
+-- Create a toggle
+function FluentLibrary:CreateToggle(tab, text, callback)
+    local toggle = Instance.new("TextButton")
+    toggle.Size = UDim2.new(0, 100, 0, 40)
+    toggle.Text = text .. ": OFF"
+    toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    toggle.TextColor3 = Color3.fromRGB(255, 255,  255)
+    toggle.Font = Enum.Font.SourceSans
+    toggle.Parent = tab
+
+    local toggleState = false
+
+    toggle.MouseButton1Click:Connect(function()
+        if toggleState then
+            toggle.Text = text .. ": OFF"
+            toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            toggleState = false
+        else
+            toggle.Text = text .. ": ON"
+            toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            toggleState = true
         end
 
-        function Tab:CreateToggle(toggleText, callback)
-            local ToggleFrame = CreateInstance("Frame", {
-                Size = UDim2.new(0, 180, 0, 30),
-                Position = UDim2.new(0.35, 0, 0.1 + (#self.Toggles * 0.12), 0), -- Middle-left positioning
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            })
-            -- ... rest of toggle code
-            ToggleFrame.Parent = MainFrame
-            table.insert(self.Toggles, ToggleFrame)
-            return ToggleFrame
-        end
+        callback(toggleState)
+    end)
 
-        function Tab:CreateSlider(sliderText, min, max, default, callback)
-            local SliderFrame = CreateInstance("Frame", {
-                Size = UDim2.new(0, 180, 0, 45),
-                Position = UDim2.new(0.65, 0, 0.1 + (#self.Sliders * 0.12), 0), -- Middle-right positioning
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            })
-            -- ... rest of slider code
-            SliderFrame.Parent = MainFrame
-            table.insert(self.Sliders, SliderFrame)
-            return SliderFrame
-        end
+    return toggle
+end
 
-        function Tab:CreateColorPicker(colorPickerText, defaultColor, callback)
-            local ColorPickerFrame = CreateInstance("Frame", {
-                Size = UDim2.new(0, 180, 0, 45),
-                Position = UDim2.new(0.35, 0, 0.5 + (#self.ColorPickers * 0.12), 0), -- Bottom area positioning
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            })
-            -- ... rest of color picker code
-            ColorPickerFrame.Parent = MainFrame
-            table.insert(self.ColorPickers, ColorPickerFrame)
-            return ColorPickerFrame
-        end
+-- Create a modal
+function FluentLibrary:CreateModal(window, title, message, callback)
+    local modal = Instance.new("Frame")
+    modal.Size = UDim2.new(0, 300, 0, 200)
+    modal.Position = UDim2.new(0.5, -150, 0.5, -100)
+    modal.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    modal.BorderSizePixel = 0
+    modal.Parent = window
 
-        return Tab
+    local modalTitle = Instance.new("TextLabel")
+    modalTitle.Size = UDim2.new(1, 0, 0, 30)
+    modalTitle.Text = title
+    modalTitle.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    modalTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    modalTitle.Font = Enum.Font.SourceSansBold
+    modalTitle.Parent = modal
+
+    local modalMessage = Instance.new("TextLabel")
+    modalMessage.Size = UDim2.new(1, 0, 1, -30)
+    modalMessage.Text = message
+    modalMessage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    modalMessage.TextColor3 = Color3.fromRGB(0, 0, 0)
+    modalMessage.Font = Enum.Font.SourceSans
+    modalMessage.Parent = modal
+
+    local modalButton = Instance.new("TextButton")
+    modalButton.Size = UDim2.new(0, 100, 0, 40)
+    modalButton.Text = "OK"
+    modalButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    modalButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    modalButton.Font = Enum.Font.SourceSans
+    modalButton.Parent = modal
+
+    modalButton.MouseButton1Click:Connect(function()
+        modal:Destroy()
+        callback()
+    end)
+
+    return modal
+end
+
+-- Create a tooltip
+function FluentLibrary:CreateTooltip(tab, text)
+    local tooltip = Instance.new("TextLabel")
+    tooltip.Size = UDim2.new(0, 200, 0, 40)
+    tooltip.Text = text
+    tooltip.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    tooltip.TextColor3 = Color3.fromRGB(0, 0, 0)
+    tooltip.Font = Enum.Font.SourceSans
+    tooltip.Parent = tab
+
+    tooltip.BackgroundTransparency = 1
+    tooltip.TextTransparency = 1
+
+    local function showTooltip()
+        tooltip.BackgroundTransparency = 0
+        tooltip.TextTransparency = 0
     end
 
-    return GUI
+    local function hideTooltip()
+        tooltip.BackgroundTransparency = 1
+        tooltip.TextTransparency = 1
+    end
+
+    tab.MouseEnter:Connect(showTooltip)
+    tab.MouseLeave:Connect(hideTooltip)
+
+    return tooltip
 end
 
 return FluentLibrary
